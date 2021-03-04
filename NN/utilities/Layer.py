@@ -1,5 +1,5 @@
 import numpy as np
-from Activation import Activation
+from .Activation import Activation
 
 
 class Dense:
@@ -10,7 +10,6 @@ class Dense:
         :param input_layer: layer before this layer
         :param activation: activation function for neurons in this layer
         """
-
         # units in layer
         self._units = units
 

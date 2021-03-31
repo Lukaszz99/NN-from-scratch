@@ -12,16 +12,19 @@ class Model:
             'loss': [],
             'val_loss': [],
             'accuracy': [],
-            'val_accuracy': []
+            'val_accuracy': [],
+            'lr': 0,
+            'desc': ''
         }
 
     def add(self, layer):
         self._layers.append(layer)
 
     def fit(self, X, y, X_val=None, y_val=None, epochs=1, batch_size=32, lr=0.001):
-
         for epoch in range(epochs):
             steps = floor(X.shape[0] / batch_size)
+
+            self._lr = lr
 
             for step in range(steps):
                 # print(f'Epoch: {epoch+1} Step: {step+1}')
@@ -53,7 +56,7 @@ class Model:
                 # weights update
                 for layer, activation_idx, loss in zip(self._layers[::-1], range(len(network_output)-1,0 ,-1), layer_losses):
                     activation = network_output[activation_idx-1]
-                    layer._update_weights(activation, loss, lr)
+                    layer._update_weights(activation, loss, self._lr)
 
                 self._batch_output = network_output[-1]
 
@@ -63,6 +66,8 @@ class Model:
             if X_val.all():
                 self._history['val_loss'].append(self._compute_cost(self._compute_forward(X_val)[-1], y_val))
                 self._history['val_accuracy'].append(self._compute_accuracy(self.predict(X_val), y_val))
+
+        self._update_history()
 
     def _compute_forward(self, input_array):
         output = [input_array]
@@ -88,33 +93,6 @@ class Model:
     def get_history(self):
         return self._history
 
-
-if __name__ == '__main__':
-    input_shape = (150, 5)  # 10 examples, 5 features
-
-    X = np.random.uniform(0, 1, input_shape)
-    y = np.random.randint(0, 3, (150, 3))
-    print(y.shape)
-
-    input_layer = Input(X)
-
-    h1 = Dense(10, input_layer, name='h1')
-    h2 = Dense(5, h1, name='h2')
-    h3 = Dense(3, h2, name='h3')
-
-
-    model = Model()
-
-    model.add(h1)
-    model.add(h2)
-    model.add(h3)
-
-    epochs = 100
-    batch_size = 1
-    lr = 0.001
-    model.fit(X, y, epochs, batch_size, lr)
-
-    # wykresy
-    hist = model.get_history()
-    plt.plot(range(epochs), hist)
-    plt.show()
+    def _update_history(self):
+        self._history['lr'] = self._lr
+        self._history['desc'] = f'Hidden layers: {len(self._layers)-1} {[layer._units for layer in self._layers[:-1]]}'

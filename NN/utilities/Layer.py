@@ -22,6 +22,7 @@ class Dense:
         self._name = name
 
         # weights matrix: [units_before, units_in_layer]
+        np.random.seed(0)
         self._weights = np.random.uniform(-0.01, 0.01, (input_layer._get_input_cols(), units))
 
         # bias in layer
